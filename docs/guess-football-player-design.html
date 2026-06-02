@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Guess The X — Brutalist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-black: #000000;
+      --color-white: #FFFFFF;
+      --color-gray-100: #F5F5F5;
+      --color-gray-200: #E5E5E5;
+      --color-gray-300: #D4D4D4;
+      --color-gray-400: #A3A3A3;
+      --color-gray-500: #737373;
+      --color-gray-600: #525252;
+      --color-gray-700: #404040;
+      --color-gray-800: #262626;
+      --color-gray-900: #171717;
+
+      --color-primary: #000000;
+      --color-accent: #FF0000;
+      --color-accent-soft: rgba(255, 0, 0, 0.1);
+
+      /* Match states */
+      --match-exact: #2D6A4F;
+      --match-exact-bg: #D8F3DC;
+      --match-exact-text: #1B4332;
+      --match-partial: #B8860B;
+      --match-partial-bg: #FFF3CD;
+      --match-partial-text: #664D03;
+      --match-wrong: #E5E5E5;
+      --match-wrong-bg: #E5E5E5;
+      --match-wrong-text: #737373;
+
+      --font-display: 'Space Mono', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --radius: 0px;
+      --transition: 150ms linear;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-black: #FFFFFF;
+        --color-white: #0A0A0A;
+        --color-gray-100: #171717;
+        --color-gray-200: #262626;
+        --color-gray-300: #404040;
+        --color-gray-400: #525252;
+        --color-gray-500: #737373;
+        --color-gray-600: #A3A3A3;
+        --color-gray-700: #D4D4D4;
+        --color-gray-800: #E5E5E5;
+        --color-gray-900: #F5F5F5;
+
+        --color-primary: #FFFFFF;
+        --color-accent: #FF3333;
+        --color-accent-soft: rgba(255, 51, 51, 0.15);
+
+        --match-exact: #52B788;
+        --match-exact-bg: #2D6A4F;
+        --match-exact-text: #D8F3DC;
+        --match-partial: #E9C46A;
+        --match-partial-bg: #78350F;
+        --match-partial-text: #FEF3C7;
+        --match-wrong: #333333;
+        --match-wrong-bg: #333333;
+        --match-wrong-text: #888888;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--color-black);
+      background: var(--color-white);
+      line-height: 1.5;
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    .game-header {
+      background: var(--color-white);
+      border-bottom: 3px solid var(--color-black);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .game-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--color-black);
+      padding: 8px 12px;
+      border: 2px solid var(--color-black);
+      background: none;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .back-btn:hover { 
+      background: var(--color-black);
+      color: var(--color-white);
+    }
+    .back-btn:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+
+    .game-title {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-black);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      height: 6px;
+      background: var(--color-gray-200);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--color-black);
+      transition: width var(--transition);
+    }
+
+    /* Game area */
+    .game-area { padding: 32px 0 64px; }
+
+    .game-intro {
+      margin-bottom: 32px;
+      border-bottom: 2px solid var(--color-black);
+      padding-bottom: 24px;
+    }
+
+    .game-intro h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .game-intro p {
+      font-family: var(--font-display);
+      color: var(--color-gray-600);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Attempts section */
+    .attempts-section {
+      margin-bottom: 32px;
+    }
+
+    .attempts-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--color-gray-200);
+    }
+
+    .attempts-title {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-gray-600);
+    }
+
+    .attempts-count {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-black);
+      background: var(--color-gray-100);
+      padding: 4px 12px;
+      border: 2px solid var(--color-black);
+    }
+
+    .attempts-dots {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .attempt-dot {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--color-gray-300);
+      background: var(--color-white);
+      transition: all var(--transition);
+    }
+
+    .attempt-dot.used {
+      background: var(--color-black);
+      border-color: var(--color-black);
+    }
+
+    /* Guess Form */
+    .guess-section {
+      margin-bottom: 32px;
+      padding: 24px;
+      border: 3px solid var(--color-black);
+      background: var(--color-gray-100);
+    }
+
+    .guess-label {
+      display: block;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--color-gray-600);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      gap: 0;
+    }
+
+    .guess-input {
+      flex: 1;
+      min-height: 56px;
+      padding: 0 16px;
+      border: 3px solid var(--color-black);
+      border-right: none;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-black);
+      background: var(--color-white);
+      transition: all var(--transition);
+    }
+
+    .guess-input::placeholder { 
+      color: var(--color-gray-400); 
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .guess-input:focus { 
+      outline: none; 
+      background: var(--color-gray-100);
+    }
+    .guess-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 24px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 3px solid var(--color-black);
+      cursor: pointer;
+      transition: all var(--transition);
+      min-height: 56px;
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .btn:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+
+    .btn-primary {
+      background: var(--color-black);
+      color: var(--color-white);
+    }
+
+    .btn-primary:hover { 
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-white);
+    }
+    .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--color-white);
+      color: var(--color-black);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-black);
+      color: var(--color-white);
+    }
+
+    .input-hint {
+      margin-top: 12px;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      color: var(--color-gray-500);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Suggestions dropdown */
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--color-white);
+      border: 3px solid var(--color-black);
+      z-index: 50;
+      max-height: 220px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .suggestions.visible { display: block; }
+
+    .suggestion-item {
+      padding: 14px 16px;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: all var(--transition);
+      color: var(--color-black);
+      border-bottom: 2px solid var(--color-gray-200);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover,
+    .suggestion-item:focus {
+      background: var(--color-black);
+      color: var(--color-white);
+      outline: none;
+    }
+
+    /* Comparison Grid */
+    .comparison-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 32px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 120px repeat(5, 1fr);
+      min-width: 560px;
+      gap: 0;
+      border: 3px solid var(--color-black);
+    }
+
+    .grid-header {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-gray-600);
+      padding: 12px 8px;
+      text-align: center;
+      background: var(--color-gray-100);
+      border-bottom: 3px solid var(--color-black);
+      border-right: 2px solid var(--color-gray-300);
+    }
+
+    .grid-header:last-child { border-right: none; }
+
+    .grid-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px 8px;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      min-height: 56px;
+      word-break: break-word;
+      line-height: 1.3;
+      transition: all var(--transition);
+      border-bottom: 2px solid var(--color-gray-200);
+      border-right: 2px solid var(--color-gray-200);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grid-cell:nth-child(6n) { border-right: none; }
+
+    .grid-row {
+      display: contents;
+    }
+
+    .grid-row.new-guess .grid-cell {
+      animation: slideInRow 200ms linear;
+    }
+
+    @keyframes slideInRow {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .grid-cell.cell-exact {
+      background: var(--match-exact-bg);
+      color: var(--match-exact-text);
+      border-color: var(--color-black);
+    }
+
+    .grid-cell.cell-partial {
+      background: var(--match-partial-bg);
+      color: var(--match-partial-text);
+      border-color: var(--color-black);
+    }
+
+    .grid-cell.cell-wrong {
+      background: var(--match-wrong-bg);
+      color: var(--match-wrong-text);
+    }
+
+    .cell-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cell-direction {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      letter-spacing: 1px;
+    }
+
+    .cell-direction svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 3;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--color-gray-500);
+      border: 3px dashed var(--color-gray-300);
+      margin-bottom: 32px;
+    }
+
+    .empty-state-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 20px;
+      opacity: 0.5;
+      color: var(--color-black);
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      color: var(--color-black);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .empty-state p {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      max-width: 400px;
+      margin: 0 auto;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1.8;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+      margin-bottom: 32px;
+      padding: 16px;
+      border: 2px solid var(--color-gray-200);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--color-gray-600);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .legend-swatch {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--color-black);
+    }
+
+    .legend-swatch.exact { background: var(--match-exact-bg); }
+    .legend-swatch.partial { background: var(--match-partial-bg); }
+    .legend-swatch.wrong { background: var(--match-wrong-bg); }
+
+    /* Feedback */
+    .feedback {
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      display: none;
+      align-items: flex-start;
+      gap: 14px;
+      animation: fadeIn 150ms linear;
+      border: 3px solid var(--color-black);
+    }
+
+    .feedback.visible { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .feedback-success { 
+      background: var(--match-exact-bg); 
+      color: var(--match-exact-text);
+    }
+    .feedback-error { 
+      background: var(--color-accent); 
+      color: var(--color-white);
+    }
+    .feedback-info { 
+      background: var(--color-gray-200); 
+      color: var(--color-black);
+    }
+
+    .feedback-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .feedback-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .feedback-body { 
+      font-family: var(--font-display);
+      font-size: 0.8rem; 
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 24px;
+    }
+
+    .modal-overlay.visible { display: flex; }
+
+    .modal {
+      background: var(--color-white);
+      border: 4px solid var(--color-black);
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      animation: modalIn 200ms linear;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+    }
+
+    .modal h2 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .modal p {
+      font-family: var(--font-display);
+      color: var(--color-gray-600);
+      margin-bottom: 32px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.8;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .modal-actions .btn:first-child {
+      border-right: none;
+    }
+
+    .kbd {
+      display: inline-block;
+      padding: 4px 10px;
+      border: 2px solid var(--color-gray-400);
+      background: var(--color-gray-100);
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--color-gray-600);
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Responsive */
+    @media (min-width: 640px) {
+      .container { padding: 0 28px; }
+      .comparison-grid { grid-template-columns: 140px repeat(5, 1fr); }
+      .grid-cell { font-size: 0.85rem; padding: 18px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="game-header">
+    <div class="container game-header-inner">
+      <a href="index.html" class="back-btn" aria-label="Back to categories">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Back
+      </a>
+      <div class="game-title" aria-label="Category: Football Players">Football Players</div>
+      <div></div>
+    </div>
+    <div class="progress-bar" aria-hidden="true">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+  </header>
+
+  <main class="game-area">
+    <div class="container">
+      <div class="game-intro">
+        <h1>Guess<br>The Player</h1>
+        <p>6 attempts · Identify the mystery footballer</p>
+      </div>
+
+      <!-- Attempts -->
+      <div class="attempts-section">
+        <div class="attempts-header">
+          <span class="attempts-title">Attempts Used</span>
+          <span class="attempts-count" id="attempts-count">0 / 6</span>
+        </div>
+        <div class="attempts-dots" id="attempt-dots">
+          <span class="attempt-dot" aria-hidden="true"></span>
+          <span class="attempt-dot" aria-hidden="true"></span>
+          <span class="attempt-dot" aria-hidden="true"></span>
+          <span class="attempt-dot" aria-hidden="true"></span>
+          <span class="attempt-dot" aria-hidden="true"></span>
+          <span class="attempt-dot" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <!-- Guess Form -->
+      <div class="guess-section">
+        <label for="guess-input" class="guess-label">Enter Player Name</label>
+        <form class="input-wrapper" onsubmit="event.preventDefault();" id="guess-form" aria-label="Make a guess">
+          <input
+            id="guess-input"
+            type="text"
+            class="guess-input"
+            placeholder="Type name..."
+            autocomplete="off"
+            aria-autocomplete="list"
+            aria-controls="suggestions"
+            aria-describedby="guess-hint"
+          />
+          <button type="submit" class="btn btn-primary" id="guess-btn">
+            Guess
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+          <div id="suggestions" class="suggestions" role="listbox"></div>
+        </form>
+        <p class="input-hint" id="guess-hint">
+          <span class="kbd">/</span> Focus · <span class="kbd">Enter</span> Submit · <span class="kbd">Esc</span> Close
+        </p>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <h3>Mystery Player</h3>
+        <p>Make your first guess. Green = exact match. Yellow = close (with arrow hints for age). Gray = incorrect.</p>
+      </div>
+
+      <!-- Comparison Grid -->
+      <div class="comparison-wrapper" id="comparison-wrapper" style="display: none;">
+        <div class="comparison-grid" id="comparison-grid" role="table" aria-label="Guess comparisons">
+          <div class="grid-header" role="columnheader">Player</div>
+          <div class="grid-header" role="columnheader">Nation</div>
+          <div class="grid-header" role="columnheader">Position</div>
+          <div class="grid-header" role="columnheader">Age</div>
+          <div class="grid-header" role="columnheader">Club</div>
+          <div class="grid-header" role="columnheader">League</div>
+        </div>
+      </div>
+
+      <div id="feedback-area" style="display: contents;"></div>
+    </div>
+  </main>
+
+  <!-- Win Modal -->
+  <div class="modal-overlay" id="win-modal" role="dialog" aria-modal="true" aria-labelledby="win-title">
+    <div class="modal">
+      <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="var(--match-exact)" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+        <line x1="9" y1="9" x2="9.01" y2="9"/>
+        <line x1="15" y1="9" x2="15.01" y2="9"/>
+      </svg>
+      <h2 id="win-title">Correct</h2>
+      <p id="win-message">You guessed the mystery player in 3 attempts.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="play-again-btn">Play Again</button>
+        <a href="index.html" class="btn btn-secondary" role="button">Categories</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lose Modal -->
+  <div class="modal-overlay" id="lose-modal" role="dialog" aria-modal="true" aria-labelledby="lose-title">
+    <div class="modal">
+      <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="8" y1="15" x2="16" y2="15"/>
+        <line x1="9" y1="9" x2="9.01" y2="9"/>
+        <line x1="15" y1="9" x2="15.01" y2="9"/>
+      </svg>
+      <h2 id="lose-title">Failed</h2>
+      <p id="lose-message">The mystery player was Lionel Messi.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="try-again-btn">Try Again</button>
+        <a href="index.html" class="btn btn-secondary" role="button">Categories</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const MAX_ATTEMPTS = 6;
+      const ATTRIBUTES = ['name', 'nationality', 'position', 'age', 'club', 'league'];
+
+      const PLAYERS = [
+        { name: 'Lionel Messi', nationality: 'Argentina', position: 'Forward', age: 37, club: 'Inter Miami', league: 'MLS' },
+        { name: 'Cristiano Ronaldo', nationality: 'Portugal', position: 'Forward', age: 40, club: 'Al Nassr', league: 'Saudi Pro League' },
+        { name: 'Erling Haaland', nationality: 'Norway', position: 'Forward', age: 24, club: 'Man City', league: 'Premier League' },
+        { name: 'Kylian Mbappe', nationality: 'France', position: 'Forward', age: 26, club: 'Real Madrid', league: 'La Liga' },
+        { name: 'Kevin De Bruyne', nationality: 'Belgium', position: 'Midfielder', age: 33, club: 'Man City', league: 'Premier League' },
+        { name: 'Jude Bellingham', nationality: 'England', position: 'Midfielder', age: 21, club: 'Real Madrid', league: 'La Liga' },
+        { name: 'Virgil van Dijk', nationality: 'Netherlands', position: 'Defender', age: 33, club: 'Liverpool', league: 'Premier League' },
+        { name: 'Vinicius Jr', nationality: 'Brazil', position: 'Forward', age: 24, club: 'Real Madrid', league: 'La Liga' },
+        { name: 'Rodri', nationality: 'Spain', position: 'Midfielder', age: 28, club: 'Man City', league: 'Premier League' },
+        { name: 'Bukayo Saka', nationality: 'England', position: 'Forward', age: 23, club: 'Arsenal', league: 'Premier League' },
+        { name: 'Florian Wirtz', nationality: 'Germany', position: 'Midfielder', age: 22, club: 'Bayer Leverkusen', league: 'Bundesliga' },
+        { name: 'Lamine Yamal', nationality: 'Spain', position: 'Forward', age: 17, club: 'Barcelona', league: 'La Liga' },
+        { name: 'Martin Odegaard', nationality: 'Norway', position: 'Midfielder', age: 26, club: 'Arsenal', league: 'Premier League' },
+        { name: 'Mohamed Salah', nationality: 'Egypt', position: 'Forward', age: 32, club: 'Liverpool', league: 'Premier League' },
+        { name: 'Trent Alexander-Arnold', nationality: 'England', position: 'Defender', age: 26, club: 'Liverpool', league: 'Premier League' }
+      ];
+
+      let targetPlayer = null;
+      let attempts = 0;
+      let gameOver = false;
+      let guesses = [];
+
+      function initGame() {
+        targetPlayer = PLAYERS[Math.floor(Math.random() * PLAYERS.length)];
+        attempts = 0;
+        gameOver = false;
+        guesses = [];
+
+        document.getElementById('empty-state').style.display = '';
+        document.getElementById('comparison-wrapper').style.display = 'none';
+        document.getElementById('comparison-grid').innerHTML = `
+          <div class="grid-header" role="columnheader">Player</div>
+          <div class="grid-header" role="columnheader">Nation</div>
+          <div class="grid-header" role="columnheader">Position</div>
+          <div class="grid-header" role="columnheader">Age</div>
+          <div class="grid-header" role="columnheader">Club</div>
+          <div class="grid-header" role="columnheader">League</div>
+        `;
+        document.getElementById('feedback-area').innerHTML = '';
+        document.getElementById('guess-input').value = '';
+        document.getElementById('guess-input').disabled = false;
+        document.getElementById('guess-btn').disabled = false;
+        document.getElementById('win-modal').classList.remove('visible');
+        document.getElementById('lose-modal').classList.remove('visible');
+        updateAttemptDots();
+        updateProgress();
+      }
+
+      function updateAttemptDots() {
+        const dots = document.querySelectorAll('#attempt-dots .attempt-dot');
+        dots.forEach((dot, i) => {
+          dot.classList.remove('used');
+          if (i < attempts) dot.classList.add('used');
+        });
+        document.getElementById('attempts-count').textContent = `${attempts} / ${MAX_ATTEMPTS}`;
+      }
+
+      function updateProgress() {
+        const pct = Math.min((attempts / MAX_ATTEMPTS) * 100, 100);
+        document.getElementById('progress-fill').style.width = pct + '%';
+      }
+
+      function showFeedback(type, title, message) {
+        const area = document.getElementById('feedback-area');
+        const id = 'feedback-' + Date.now();
+        let iconSvg = '';
+        if (type === 'success') {
+          iconSvg = `<svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+        } else if (type === 'error') {
+          iconSvg = `<svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+        } else {
+          iconSvg = `<svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+        }
+        area.innerHTML = `
+          <div id="${id}" class="feedback feedback-${type} visible" role="${type === 'error' ? 'alert' : 'status'}" aria-live="${type === 'error' ? 'assertive' : 'polite'}">
+            ${iconSvg}
+            <div>
+              <div class="feedback-title">${title}</div>
+              <div class="feedback-body">${message}</div>
+            </div>
+          </div>
+        `;
+        if (type === 'info') {
+          setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('visible');
+          }, 4000);
+        }
+      }
+
+      function getDirectionIcon(direction) {
+        if (direction === 'higher') {
+          return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>`;
+        }
+        if (direction === 'lower') {
+          return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>`;
+        }
+        return '';
+      }
+
+      function buildCell(attr, guessedValue, targetValue) {
+        let statusClass = 'cell-wrong';
+        let displayValue = String(guessedValue);
+        let direction = null;
+        let ariaLabel = `${attr}: ${guessedValue}`;
+
+        if (attr === 'age') {
+          if (guessedValue === targetValue) {
+            statusClass = 'cell-exact';
+            ariaLabel += ', correct';
+          } else {
+            statusClass = 'cell-partial';
+            direction = guessedValue < targetValue ? 'higher' : 'lower';
+            ariaLabel += `, target is ${direction}`;
+            displayValue = `<div class="cell-content"><span>${guessedValue}</span><span class="cell-direction">${getDirectionIcon(direction)} ${direction === 'higher' ? 'Higher' : 'Lower'}</span></div>`;
+          }
+        } else {
+          if (String(guessedValue).toLowerCase() === String(targetValue).toLowerCase()) {
+            statusClass = 'cell-exact';
+            ariaLabel += ', correct';
+          } else {
+            statusClass = 'cell-wrong';
+            ariaLabel += ', incorrect';
+          }
+        }
+
+        return { statusClass, displayValue, ariaLabel };
+      }
+
+      function addGuessRow(guessedPlayer) {
+        const grid = document.getElementById('comparison-grid');
+        const wrapper = document.getElementById('comparison-wrapper');
+        const empty = document.getElementById('empty-state');
+
+        empty.style.display = 'none';
+        wrapper.style.display = '';
+
+        const rowId = 'row-' + Date.now();
+        const cells = [];
+        ATTRIBUTES.forEach((attr) => {
+          const guessedValue = guessedPlayer[attr];
+          const targetValue = targetPlayer[attr];
+          const { statusClass, displayValue, ariaLabel } = buildCell(attr, guessedValue, targetValue);
+          cells.push(`<div class="grid-cell ${statusClass}" role="cell" aria-label="${ariaLabel}">${displayValue}</div>`);
+        });
+
+        const rowHtml = `<div class="grid-row new-guess" id="${rowId}" role="row">${cells.join('')}</div>`;
+        grid.insertAdjacentHTML('beforeend', rowHtml);
+
+        setTimeout(() => {
+          const row = document.getElementById(rowId);
+          if (row) row.classList.remove('new-guess');
+        }, 250);
+      }
+
+      function makeGuess(playerName) {
+        if (gameOver) return;
+        const normalized = playerName.trim();
+        if (!normalized) return;
+
+        const guessedPlayer = PLAYERS.find(p => p.name.toLowerCase() === normalized.toLowerCase());
+        if (!guessedPlayer) {
+          showFeedback('error', 'Not Found', 'Select a player from suggestions.');
+          return;
+        }
+
+        if (guesses.some(g => g.name.toLowerCase() === guessedPlayer.name.toLowerCase())) {
+          showFeedback('info', 'Duplicate', `${guessedPlayer.name} already guessed.`);
+          return;
+        }
+
+        guesses.push(guessedPlayer);
+        attempts++;
+        updateAttemptDots();
+        updateProgress();
+        addGuessRow(guessedPlayer);
+
+        const isCorrect = guessedPlayer.name.toLowerCase() === targetPlayer.name.toLowerCase();
+
+        if (isCorrect) {
+          gameOver = true;
+          showFeedback('success', 'Correct', `${guessedPlayer.name} is the answer.`);
+          document.getElementById('guess-input').disabled = true;
+          document.getElementById('guess-btn').disabled = true;
+          setTimeout(() => {
+            document.getElementById('win-message').textContent = `Solved in ${attempts} attempt${attempts === 1 ? '' : 's'}.`;
+            document.getElementById('win-modal').classList.add('visible');
+          }, 600);
+        } else if (attempts >= MAX_ATTEMPTS) {
+          gameOver = true;
+          showFeedback('error', 'Game Over', `Answer: ${targetPlayer.name}.`);
+          document.getElementById('guess-input').disabled = true;
+          document.getElementById('guess-btn').disabled = true;
+          setTimeout(() => {
+            document.getElementById('lose-message').textContent = `The player was ${targetPlayer.name}.`;
+            document.getElementById('lose-modal').classList.add('visible');
+          }, 600);
+        }
+      }
+
+      const input = document.getElementById('guess-input');
+      const suggestionsBox = document.getElementById('suggestions');
+      const form = document.getElementById('guess-form');
+
+      input.addEventListener('input', function() {
+        const val = this.value.trim().toLowerCase();
+        suggestionsBox.innerHTML = '';
+        if (!val || val.length < 1) {
+          suggestionsBox.classList.remove('visible');
+          return;
+        }
+        const alreadyGuessed = guesses.map(g => g.name.toLowerCase());
+        const matches = PLAYERS
+          .filter(p => p.name.toLowerCase().includes(val) && !alreadyGuessed.includes(p.name.toLowerCase()))
+          .slice(0, 6);
+        if (matches.length) {
+          matches.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.textContent = m.name;
+            div.setAttribute('role', 'option');
+            div.setAttribute('tabindex', '0');
+            div.addEventListener('click', () => { input.value = m.name; suggestionsBox.classList.remove('visible'); input.focus(); });
+            div.addEventListener('keydown', (e) => { if (e.key === 'Enter') { input.value = m.name; suggestionsBox.classList.remove('visible'); input.focus(); } });
+            suggestionsBox.appendChild(div);
+          });
+          suggestionsBox.classList.add('visible');
+        } else {
+          suggestionsBox.classList.remove('visible');
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!form.contains(e.target)) suggestionsBox.classList.remove('visible');
+      });
+
+      form.addEventListener('submit', () => {
+        makeGuess(input.value);
+        input.value = '';
+        suggestionsBox.classList.remove('visible');
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          input.blur();
+          suggestionsBox.classList.remove('visible');
+          document.querySelectorAll('.modal-overlay.visible').forEach(m => m.classList.remove('visible'));
+        }
+        if (e.key === '/' && document.activeElement !== input && !gameOver) {
+          e.preventDefault();
+          input.focus();
+        }
+      });
+
+      document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) overlay.classList.remove('visible');
+        });
+      });
+
+      document.getElementById('play-again-btn').addEventListener('click', initGame);
+      document.getElementById('try-again-btn').addEventListener('click', initGame);
+      initGame();
+    })();
+  </script>
+</body>
+</html>
