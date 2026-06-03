@@ -14,6 +14,7 @@ describe("Guess The X app shell", () => {
     const html = renderRoute("/football");
 
     expect(html).toContain("Guess The Football Player");
+    expect(html).toContain('href="/" aria-label="Go to Guess The X home">Home</a>');
     expect(html).toContain("Loading player database");
     expect(html).not.toContain("Could not load football data");
     expect(html).toContain("2025 data · v1");

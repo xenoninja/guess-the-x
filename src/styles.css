@@ -159,10 +159,12 @@ h2 {
 }
 
 .back-link {
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  aspect-ratio: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 76px;
+  min-height: 44px;
+  padding: 0 14px;
   color: var(--paper);
   background: var(--ink);
   text-decoration: none;
