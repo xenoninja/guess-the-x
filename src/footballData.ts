@@ -1,4 +1,6 @@
 export const FOOTBALL_DATA_ASSET_PATH = "/data/football-players-2025-v1.parquet";
+export const FOOTBALL_DATA_VERSION = "football-players-2025-v1";
+export const FOOTBALL_GAME_ID = "guess-football-player";
 export const EXPECTED_FOOTBALL_DATA_SUMMARY = {
   guessablePlayerCount: 12899,
   answerCandidateCount: 732,
