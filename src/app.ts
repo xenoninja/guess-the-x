@@ -1,7 +1,12 @@
 export type RouteName = "home" | "football" | "not-found";
-export type FootballShellState = "loading" | "error";
+export type FootballShellState = "loading" | "ready" | "error";
+export type FootballDataSummary = {
+  guessablePlayerCount: number;
+  answerCandidateCount: number;
+};
 export type RenderRouteOptions = {
   footballState?: FootballShellState;
+  footballDataSummary?: FootballDataSummary;
 };
 
 export function routeForPath(pathname: string): RouteName {
@@ -36,7 +41,7 @@ export function renderRoute(pathname: string, options: RenderRouteOptions = {}):
   }
 
   if (route === "football") {
-    return renderFootballShell(options.footballState ?? "loading");
+    return renderFootballShell(options.footballState ?? "loading", options.footballDataSummary);
   }
 
   return renderPage({
@@ -50,7 +55,7 @@ export function renderRoute(pathname: string, options: RenderRouteOptions = {}):
   });
 }
 
-function renderFootballShell(state: FootballShellState): string {
+function renderFootballShell(state: FootballShellState, summary?: FootballDataSummary): string {
   return renderPage({
     body: `
         <header class="game-header">
@@ -65,13 +70,13 @@ function renderFootballShell(state: FootballShellState): string {
             <p>Call your shot. Six tries. The grid exposes the truth.</p>
           </section>
 
-          ${renderFootballState(state)}
+          ${renderFootballState(state, summary)}
         </main>
       `,
   });
 }
 
-function renderFootballState(state: FootballShellState): string {
+function renderFootballState(state: FootballShellState, summary?: FootballDataSummary): string {
   if (state === "error") {
     return `
       <section class="state-panel state-panel--error" aria-live="polite" aria-labelledby="error-title">
@@ -83,6 +88,26 @@ function renderFootballState(state: FootballShellState): string {
     `;
   }
 
+  if (state === "ready" && summary) {
+    return `
+      <section class="state-panel state-panel--ready" aria-live="polite" aria-labelledby="ready-title">
+        <p class="state-kicker">Ready</p>
+        <h2 id="ready-title">Player database ready</h2>
+        <dl class="data-summary" aria-label="Loaded football data summary">
+          <div>
+            <dt>Guessable Players</dt>
+            <dd>${formatCount(summary.guessablePlayerCount)} Guessable Players</dd>
+          </div>
+          <div>
+            <dt>Answer Candidates</dt>
+            <dd>${formatCount(summary.answerCandidateCount)} Answer Candidates</dd>
+          </div>
+        </dl>
+        <p>The grid is armed.</p>
+      </section>
+    `;
+  }
+
   return `
     <section class="state-panel" aria-live="polite" aria-labelledby="loading-title">
       <p class="state-kicker">Loading</p>
@@ -90,6 +115,10 @@ function renderFootballState(state: FootballShellState): string {
       <p>Preparing Guessable Players and Answer Candidates.</p>
     </section>
   `;
+}
+
+function formatCount(value: number): string {
+  return new Intl.NumberFormat("en-US").format(value);
 }
 
 function renderPage({ body }: { body: string }): string {

@@ -28,6 +28,22 @@ describe("Guess The X app shell", () => {
     expect(html).not.toContain("Loading player database");
   });
 
+  it("renders the ready football game shell with loaded data counts", () => {
+    const html = renderRoute("/football", {
+      footballState: "ready",
+      footballDataSummary: {
+        guessablePlayerCount: 12899,
+        answerCandidateCount: 732,
+      },
+    });
+
+    expect(html).toContain("Player database ready");
+    expect(html).toContain("12,899 Guessable Players");
+    expect(html).toContain("732 Answer Candidates");
+    expect(html).not.toContain("Loading player database");
+    expect(html).not.toContain("Could not load football data");
+  });
+
   it("accepts the trailing slash football route", () => {
     const html = renderRoute("/football/");
 
