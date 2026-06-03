@@ -54,7 +54,7 @@ function renderFootballShell(state: FootballShellState): string {
   return renderPage({
     body: `
         <header class="game-header">
-          <a class="back-link" href="/" aria-label="Back to Guess The X">GTX</a>
+          <a class="back-link" href="/" aria-label="Go to Guess The X home">Home</a>
           <p>Guess The Football Player</p>
           <span>2025 data · v1</span>
         </header>
@@ -62,7 +62,7 @@ function renderFootballShell(state: FootballShellState): string {
           <section class="game-intro">
             <p class="eyebrow">Daily Puzzle</p>
             <h1 id="football-title">Guess The Football Player</h1>
-            <p>Name a player. Read the trail: Nation, Position, Puzzle Age, Height, Foot, Club.</p>
+            <p>Call your shot. Six tries. The grid exposes the truth.</p>
           </section>
 
           ${renderFootballState(state)}
