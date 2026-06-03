@@ -1,0 +1,3 @@
+# Client-side football game architecture
+
+Guess The Football Player v1 will be deployed as a Cloudflare Pages static site with no Worker or backend. The football data will be published as a versioned Parquet static asset and queried in the browser with DuckDB-Wasm; the Daily Puzzle uses a UTC Puzzle Date, deterministic answer selection, and locally stored Puzzle Progress. This keeps the first version simple to deploy and cheap to operate while preserving enough structured query power for the football dataset; R2 object storage, a DuckDB database asset, and backend-controlled answer schedules can be introduced later if the data size or product requirements justify them.
