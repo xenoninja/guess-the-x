@@ -52,7 +52,8 @@ INVALID_COUNT=$(duckdb -readonly -csv -noheader "$TEMP_DB" -c "
        OR club_name IS NULL OR trim(club_name) = ''
        OR league_id IS NULL OR trim(league_id) = ''
        OR league_name IS NULL OR trim(league_name) = ''
-       OR league_country IS NULL OR trim(league_country) = '';
+       OR league_country IS NULL OR trim(league_country) = ''
+       OR is_answer_candidate IS NULL;
 ")
 
 if [ "$PLAYER_COUNT" -eq 0 ]; then

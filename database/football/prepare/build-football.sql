@@ -145,6 +145,7 @@ CREATE TABLE players (
     league_country VARCHAR NOT NULL,
     market_value_eur INTEGER,
     highest_market_value_eur INTEGER,
+    is_answer_candidate BOOLEAN NOT NULL,
     snapshot_season SMALLINT NOT NULL
 );
 
@@ -167,6 +168,11 @@ SELECT
     c.country_name,
     p.market_value_in_eur,
     p.highest_market_value_in_eur,
+    coalesce(
+        p.current_club_domestic_competition_id IN ('GB1', 'ES1', 'IT1', 'L1', 'FR1')
+        AND p.highest_market_value_in_eur >= 25000000,
+        false
+    ),
     cast(p.last_season AS SMALLINT)
 FROM source.players p
 JOIN source.countries n ON p.country_of_citizenship = n.country_name

@@ -10,13 +10,15 @@ Run from the repository root:
 
 ```bash
 ./database/football/prepare/build-football.sh
+./database/football/prepare/export-football-parquet.sh
 ```
 
 The script reads `database/football/prepare/transfermarkt-datasets.duckdb`,
 builds and validates a temporary database, then replaces
 `database/football/football.duckdb` only
-after validation passes. The filtering and transformation logic lives in
-`database/football/prepare/build-football.sql`.
+after validation passes. The export script writes the versioned browser data
+asset to `public/data/football-players-2025-v1.parquet`. The filtering and
+transformation logic lives in `database/football/prepare/build-football.sql`.
 
 ## Runtime Table
 
@@ -33,6 +35,7 @@ Current snapshot summary:
 | Players | 12,899 |
 | Leagues | 32 |
 | Nations | 103 |
+| Answer candidates | 732 |
 | Snapshot season | 2025 |
 
 ## Player Attributes
@@ -56,9 +59,27 @@ Current snapshot summary:
 | `league_country` | `VARCHAR` | Country where the current domestic league is played. | `England` |
 | `market_value_eur` | `INTEGER NULL` | Current estimated market value in euros. Useful for difficulty ranking. | `200000000` |
 | `highest_market_value_eur` | `INTEGER NULL` | Highest recorded estimated market value in euros. Useful as a recognizability signal. | `200000000` |
+| `is_answer_candidate` | `BOOLEAN` | Whether the player is eligible to be the mystery answer in the first game version. | `true` |
 | `snapshot_season` | `SMALLINT` | Latest source season selected automatically during generation. | `2025` |
 
 All attributes except the two market-value columns are non-null.
+
+## Answer Candidates
+
+The first game version chooses mystery answers from players marked
+`is_answer_candidate = true`. A player is an answer candidate when they play in
+one of the Big Five European Leagues and have a highest recorded market value of
+at least EUR 25,000,000.
+
+The Big Five European League competition IDs are:
+
+| League | Competition ID |
+| --- | --- |
+| Premier League | `GB1` |
+| LaLiga | `ES1` |
+| Serie A | `IT1` |
+| Bundesliga | `L1` |
+| Ligue 1 | `FR1` |
 
 ## Geographic Continents
 
