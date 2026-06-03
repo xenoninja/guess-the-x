@@ -214,9 +214,41 @@ h2 {
   box-shadow: 6px 6px 0 var(--accent);
 }
 
+.state-panel--ready {
+  border-color: var(--match-exact);
+  box-shadow: 6px 6px 0 var(--match-exact);
+}
+
 .state-panel p:last-of-type {
   color: var(--muted);
   font-weight: 700;
+}
+
+.data-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.data-summary div {
+  padding: 14px;
+  background: var(--wash);
+  border: 2px solid var(--line);
+}
+
+.data-summary dt {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.data-summary dd {
+  margin: 4px 0 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+  line-height: 1.05;
 }
 
 .state-panel button {
@@ -245,5 +277,9 @@ h2 {
 
   .game-header p {
     text-align: right;
+  }
+
+  .data-summary {
+    grid-template-columns: 1fr;
   }
 }
