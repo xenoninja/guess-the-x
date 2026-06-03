@@ -35,13 +35,40 @@ describe("Guess The X app shell", () => {
         guessablePlayerCount: 12899,
         answerCandidateCount: 732,
       },
+      dailyPuzzleSummary: {
+        puzzleDate: "2026-06-04",
+        attemptsRemaining: 6,
+        maxAttempts: 6,
+        completed: false,
+      },
     });
 
     expect(html).toContain("Player database ready");
     expect(html).toContain("12,899 Guessable Players");
     expect(html).toContain("732 Answer Candidates");
+    expect(html).toContain("2026-06-04 Puzzle Date");
+    expect(html).toContain("6 attempts left");
     expect(html).not.toContain("Loading player database");
     expect(html).not.toContain("Could not load football data");
+  });
+
+  it("renders a locked completed Daily Puzzle ready state", () => {
+    const html = renderRoute("/football", {
+      footballState: "ready",
+      footballDataSummary: {
+        guessablePlayerCount: 12899,
+        answerCandidateCount: 732,
+      },
+      dailyPuzzleSummary: {
+        puzzleDate: "2026-06-04",
+        attemptsRemaining: 0,
+        maxAttempts: 6,
+        completed: true,
+      },
+    });
+
+    expect(html).toContain("Daily Puzzle locked");
+    expect(html).toContain("0 attempts left");
   });
 
   it("accepts the trailing slash football route", () => {

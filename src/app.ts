@@ -4,9 +4,16 @@ export type FootballDataSummary = {
   guessablePlayerCount: number;
   answerCandidateCount: number;
 };
+export type DailyPuzzleSummary = {
+  puzzleDate: string;
+  attemptsRemaining: number;
+  maxAttempts: number;
+  completed: boolean;
+};
 export type RenderRouteOptions = {
   footballState?: FootballShellState;
   footballDataSummary?: FootballDataSummary;
+  dailyPuzzleSummary?: DailyPuzzleSummary;
 };
 
 export function routeForPath(pathname: string): RouteName {
@@ -41,7 +48,11 @@ export function renderRoute(pathname: string, options: RenderRouteOptions = {}):
   }
 
   if (route === "football") {
-    return renderFootballShell(options.footballState ?? "loading", options.footballDataSummary);
+    return renderFootballShell(
+      options.footballState ?? "loading",
+      options.footballDataSummary,
+      options.dailyPuzzleSummary,
+    );
   }
 
   return renderPage({
@@ -55,7 +66,11 @@ export function renderRoute(pathname: string, options: RenderRouteOptions = {}):
   });
 }
 
-function renderFootballShell(state: FootballShellState, summary?: FootballDataSummary): string {
+function renderFootballShell(
+  state: FootballShellState,
+  summary?: FootballDataSummary,
+  dailyPuzzleSummary?: DailyPuzzleSummary,
+): string {
   return renderPage({
     body: `
         <header class="game-header">
@@ -70,13 +85,17 @@ function renderFootballShell(state: FootballShellState, summary?: FootballDataSu
             <p>Call your shot. Six tries. The grid exposes the truth.</p>
           </section>
 
-          ${renderFootballState(state, summary)}
+          ${renderFootballState(state, summary, dailyPuzzleSummary)}
         </main>
       `,
   });
 }
 
-function renderFootballState(state: FootballShellState, summary?: FootballDataSummary): string {
+function renderFootballState(
+  state: FootballShellState,
+  summary?: FootballDataSummary,
+  dailyPuzzleSummary?: DailyPuzzleSummary,
+): string {
   if (state === "error") {
     return `
       <section class="state-panel state-panel--error" aria-live="polite" aria-labelledby="error-title">
@@ -88,12 +107,12 @@ function renderFootballState(state: FootballShellState, summary?: FootballDataSu
     `;
   }
 
-  if (state === "ready" && summary) {
+  if (state === "ready" && summary && dailyPuzzleSummary) {
     return `
       <section class="state-panel state-panel--ready" aria-live="polite" aria-labelledby="ready-title">
         <p class="state-kicker">Ready</p>
         <h2 id="ready-title">Player database ready</h2>
-        <dl class="data-summary" aria-label="Loaded football data summary">
+        <dl class="data-summary" aria-label="Loaded football data and Daily Puzzle summary">
           <div>
             <dt>Guessable Players</dt>
             <dd>${formatCount(summary.guessablePlayerCount)} Guessable Players</dd>
@@ -102,7 +121,16 @@ function renderFootballState(state: FootballShellState, summary?: FootballDataSu
             <dt>Answer Candidates</dt>
             <dd>${formatCount(summary.answerCandidateCount)} Answer Candidates</dd>
           </div>
+          <div>
+            <dt>Puzzle Date</dt>
+            <dd>${dailyPuzzleSummary.puzzleDate} Puzzle Date</dd>
+          </div>
+          <div>
+            <dt>Attempts</dt>
+            <dd>${dailyPuzzleSummary.attemptsRemaining} attempts left</dd>
+          </div>
         </dl>
+        ${dailyPuzzleSummary.completed ? '<p class="lock-copy">Daily Puzzle locked</p>' : ""}
         <p>The grid is armed.</p>
       </section>
     `;
