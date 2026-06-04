@@ -7,6 +7,7 @@ import "./styles.css";
 import { renderRoute, routeForPath } from "./app";
 import { consumeDailyPuzzleResetQuery, createDailyPuzzle, savePuzzleProgress } from "./dailyPuzzle";
 import { createDuckDbFootballDataSource } from "./duckdbFootballDataSource";
+import { compareFootballGuess } from "./footballClues";
 import {
   EXPECTED_FOOTBALL_DATA_SUMMARY,
   FOOTBALL_DATA_VERSION,
@@ -84,6 +85,16 @@ function renderReadyFootballGame(
       maxAttempts: dailyPuzzle.maxAttempts,
       completed: dailyPuzzle.completed,
     },
+    comparisonHistory: dailyPuzzle.progress.guessedPlayerIds
+      .map((playerId) => footballData.guessablePlayers.find((player) => player.playerId === playerId))
+      .filter((player) => player !== undefined)
+      .map((guess) =>
+        compareFootballGuess({
+          guess,
+          answer: dailyPuzzle.answer,
+          puzzleDate: dailyPuzzle.identity.puzzleDate,
+        }),
+      ),
   });
 
   hydratePlayerGuessCombobox({

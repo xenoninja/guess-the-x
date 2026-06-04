@@ -10,10 +10,22 @@ export type DailyPuzzleSummary = {
   maxAttempts: number;
   completed: boolean;
 };
+export type ClueComparisonSummary = {
+  label: string;
+  value: string;
+  match: "exact" | "partial" | "miss";
+  direction?: "higher" | "lower";
+};
+export type GuessComparisonSummary = {
+  playerId: number;
+  playerName: string;
+  clues: ClueComparisonSummary[];
+};
 export type RenderRouteOptions = {
   footballState?: FootballShellState;
   footballDataSummary?: FootballDataSummary;
   dailyPuzzleSummary?: DailyPuzzleSummary;
+  comparisonHistory?: GuessComparisonSummary[];
 };
 
 export function routeForPath(pathname: string): RouteName {
@@ -52,6 +64,7 @@ export function renderRoute(pathname: string, options: RenderRouteOptions = {}):
       options.footballState ?? "loading",
       options.footballDataSummary,
       options.dailyPuzzleSummary,
+      options.comparisonHistory ?? [],
     );
   }
 
@@ -70,6 +83,7 @@ function renderFootballShell(
   state: FootballShellState,
   summary?: FootballDataSummary,
   dailyPuzzleSummary?: DailyPuzzleSummary,
+  comparisonHistory: GuessComparisonSummary[] = [],
 ): string {
   return renderPage({
     body: `
@@ -85,7 +99,7 @@ function renderFootballShell(
             <p>Call your shot. Six tries. The grid exposes the truth.</p>
           </section>
 
-          ${renderFootballState(state, summary, dailyPuzzleSummary)}
+          ${renderFootballState(state, summary, dailyPuzzleSummary, comparisonHistory)}
         </main>
       `,
   });
@@ -95,6 +109,7 @@ function renderFootballState(
   state: FootballShellState,
   summary?: FootballDataSummary,
   dailyPuzzleSummary?: DailyPuzzleSummary,
+  comparisonHistory: GuessComparisonSummary[] = [],
 ): string {
   if (state === "error") {
     return `
@@ -131,6 +146,7 @@ function renderFootballState(
           </div>
         </dl>
         ${renderGuessCombobox(dailyPuzzleSummary)}
+        ${renderComparisonHistory(comparisonHistory)}
         ${dailyPuzzleSummary.completed ? '<p class="lock-copy">Daily Puzzle locked</p>' : ""}
         <p>The grid is armed.</p>
       </section>
@@ -175,6 +191,64 @@ function renderGuessCombobox(dailyPuzzleSummary: DailyPuzzleSummary): string {
       <p class="guess-message" data-player-guess-message aria-live="polite"></p>
     </form>
   `;
+}
+
+function renderComparisonHistory(comparisonHistory: GuessComparisonSummary[]): string {
+  if (comparisonHistory.length === 0) {
+    return "";
+  }
+
+  const clueLabels = comparisonHistory[0]?.clues.map((clue) => clue.label) ?? [];
+
+  return `
+    <section class="comparison-history" aria-label="Comparison history">
+      <div class="comparison-grid" role="table">
+        <div class="comparison-header" role="row">
+          ${clueLabels.map((label) => `<div role="columnheader">${escapeHtml(label)}</div>`).join("")}
+        </div>
+        ${comparisonHistory.map(renderComparisonRow).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderComparisonRow(comparison: GuessComparisonSummary): string {
+  return `
+    <div class="comparison-row" role="row" data-player-id="${comparison.playerId}">
+      <div class="guess-row-header">${escapeHtml(comparison.playerName)}</div>
+      ${comparison.clues.map(renderClueCell).join("")}
+    </div>
+  `;
+}
+
+function renderClueCell(clue: ClueComparisonSummary): string {
+  return `
+    <div
+      class="clue-cell"
+      role="cell"
+      data-clue="${escapeHtml(clue.label)}"
+      data-match="${clue.match}"
+      ${clue.direction ? `data-direction="${clue.direction}"` : ""}
+    >
+      <span class="clue-label">${escapeHtml(clue.label)}</span>
+      <span class="clue-value">${escapeHtml(clue.value)}</span>
+      ${clue.direction ? `<span class="clue-direction">${clue.direction}</span>` : ""}
+    </div>
+  `;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+
+    return entities[character];
+  });
 }
 
 function renderPage({ body }: { body: string }): string {

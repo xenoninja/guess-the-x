@@ -96,9 +96,21 @@ function mapFootballPlayerRow(row: Record<string, unknown>): FootballPlayer {
   };
 }
 
-function formatDuckDbDate(value: unknown): string {
+export function formatDuckDbDate(value: unknown): string {
   if (value instanceof Date) {
     return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "number") {
+    return new Date(value).toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "object" && value !== null && "valueOf" in value) {
+    const primitiveValue = value.valueOf();
+
+    if (typeof primitiveValue === "number") {
+      return new Date(primitiveValue).toISOString().slice(0, 10);
+    }
   }
 
   return String(value);
