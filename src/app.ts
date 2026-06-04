@@ -130,6 +130,7 @@ function renderFootballState(
             <dd>${dailyPuzzleSummary.attemptsRemaining} attempts left</dd>
           </div>
         </dl>
+        ${renderGuessCombobox(dailyPuzzleSummary)}
         ${dailyPuzzleSummary.completed ? '<p class="lock-copy">Daily Puzzle locked</p>' : ""}
         <p>The grid is armed.</p>
       </section>
@@ -147,6 +148,33 @@ function renderFootballState(
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
+}
+
+function renderGuessCombobox(dailyPuzzleSummary: DailyPuzzleSummary): string {
+  const disabledAttribute = dailyPuzzleSummary.completed ? "disabled" : "";
+
+  return `
+    <form class="guess-form" data-player-guess-form autocomplete="off">
+      <label for="player-guess-input">Your guess</label>
+      <div class="guess-control">
+        <input
+          id="player-guess-input"
+          name="playerGuess"
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="player-guess-listbox"
+          aria-activedescendant=""
+          placeholder="Start typing a player"
+          ${disabledAttribute}
+        />
+        <button type="submit" ${disabledAttribute}>Guess</button>
+      </div>
+      <div id="player-guess-listbox" class="suggestion-list" role="listbox" hidden></div>
+      <p class="guess-message" data-player-guess-message aria-live="polite"></p>
+    </form>
+  `;
 }
 
 function renderPage({ body }: { body: string }): string {
