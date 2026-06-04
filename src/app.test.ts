@@ -41,6 +41,21 @@ describe("Guess The X app shell", () => {
         maxAttempts: 6,
         completed: false,
       },
+      comparisonHistory: [
+        {
+          playerId: 30,
+          playerName: "Bukayo Saka",
+          clues: [
+            { label: "Player", value: "Bukayo Saka", match: "miss" },
+            { label: "Nation", value: "England", match: "partial" },
+            { label: "Position", value: "Attack", match: "exact" },
+            { label: "Puzzle Age", value: "24", match: "partial", direction: "higher" },
+            { label: "Height", value: "178 cm", match: "partial", direction: "higher" },
+            { label: "Foot", value: "left", match: "exact" },
+            { label: "Club", value: "Arsenal Football Club", match: "partial" },
+          ],
+        },
+      ],
     });
 
     expect(html).toContain("Player database ready");
@@ -52,8 +67,19 @@ describe("Guess The X app shell", () => {
     expect(html).toContain('aria-controls="player-guess-listbox"');
     expect(html).toContain('role="listbox"');
     expect(html).toContain('data-player-guess-form');
+    expect(html).toContain('class="comparison-history"');
+    expect(html).toContain('class="comparison-grid"');
+    expect(html).toContain('class="comparison-row"');
+    expect(html).toContain('class="guess-row-header">Bukayo Saka</div>');
+    expect(html).toContain("Puzzle Age");
+    expect(html).toContain("Arsenal Football Club");
+    expect(html).toContain('data-match="partial"');
+    expect(html).toContain('data-direction="higher"');
     expect(html).not.toContain("Loading player database");
     expect(html).not.toContain("Could not load football data");
+    expect(html).not.toContain("Right Winger");
+    expect(html).not.toContain("Europe");
+    expect(html).not.toContain("GB1");
   });
 
   it("renders a locked completed Daily Puzzle ready state", () => {

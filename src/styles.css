@@ -350,6 +350,86 @@ h2 {
   font-weight: 800;
 }
 
+.comparison-history {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.comparison-grid {
+  display: grid;
+  min-width: 820px;
+  border: 3px solid var(--line);
+}
+
+.comparison-header,
+.comparison-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(110px, 1fr));
+}
+
+.comparison-header {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.comparison-header > div,
+.clue-cell {
+  border-right: 2px solid var(--line);
+  border-bottom: 2px solid var(--line);
+  padding: 10px;
+}
+
+.comparison-header > div:last-child,
+.clue-cell:last-child {
+  border-right: 0;
+}
+
+.comparison-row:last-child .clue-cell {
+  border-bottom: 0;
+}
+
+.guess-row-header,
+.clue-label {
+  display: none;
+}
+
+.clue-cell {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 72px;
+  overflow-wrap: anywhere;
+}
+
+.clue-cell[data-match="exact"] {
+  color: var(--match-exact);
+  background: var(--match-exact-bg);
+}
+
+.clue-cell[data-match="partial"] {
+  color: var(--match-partial);
+  background: var(--match-partial-bg);
+}
+
+.clue-cell[data-match="miss"] {
+  color: var(--muted);
+  background: var(--match-miss);
+}
+
+.clue-value {
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.clue-direction {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 @media (max-width: 640px) {
   .game-header {
     grid-template-columns: auto 1fr;
@@ -371,5 +451,53 @@ h2 {
   .guess-control,
   .suggestion-option {
     grid-template-columns: 1fr;
+  }
+
+  .comparison-history {
+    overflow-x: visible;
+  }
+
+  .comparison-grid {
+    min-width: 0;
+    border: 0;
+    gap: 12px;
+  }
+
+  .comparison-header {
+    display: none;
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+    border: 3px solid var(--line);
+  }
+
+  .guess-row-header {
+    display: block;
+    grid-column: 1 / -1;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .clue-cell {
+    min-height: 82px;
+    border: 2px solid var(--line);
+  }
+
+  .comparison-row:last-child .clue-cell,
+  .clue-cell:last-child {
+    border: 2px solid var(--line);
+  }
+
+  .clue-label {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 }
