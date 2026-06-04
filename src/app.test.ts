@@ -48,6 +48,10 @@ describe("Guess The X app shell", () => {
     expect(html).toContain("732 Answer Candidates");
     expect(html).toContain("2026-06-04 Puzzle Date");
     expect(html).toContain("6 attempts left");
+    expect(html).toContain('role="combobox"');
+    expect(html).toContain('aria-controls="player-guess-listbox"');
+    expect(html).toContain('role="listbox"');
+    expect(html).toContain('data-player-guess-form');
     expect(html).not.toContain("Loading player database");
     expect(html).not.toContain("Could not load football data");
   });
@@ -69,6 +73,7 @@ describe("Guess The X app shell", () => {
 
     expect(html).toContain("Daily Puzzle locked");
     expect(html).toContain("0 attempts left");
+    expect(html).toContain("disabled");
   });
 
   it("accepts the trailing slash football route", () => {
