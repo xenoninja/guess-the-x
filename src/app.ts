@@ -145,6 +145,7 @@ function renderFootballState(
             <dd>${dailyPuzzleSummary.attemptsRemaining} attempts left</dd>
           </div>
         </dl>
+        ${renderMatchLegend()}
         ${renderGuessCombobox(dailyPuzzleSummary)}
         ${renderComparisonHistory(comparisonHistory)}
         ${dailyPuzzleSummary.completed ? '<p class="lock-copy">Daily Puzzle locked</p>' : ""}
@@ -164,6 +165,18 @@ function renderFootballState(
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
+}
+
+function renderMatchLegend(): string {
+  return `
+    <section class="match-legend" aria-label="Clue match legend">
+      <div class="legend-items">
+        <span class="legend-swatch" data-match="exact">Exact</span>
+        <span class="legend-swatch" data-match="partial">Partial</span>
+        <span class="legend-swatch" data-match="miss">Miss</span>
+      </div>
+    </section>
+  `;
 }
 
 function renderGuessCombobox(dailyPuzzleSummary: DailyPuzzleSummary): string {

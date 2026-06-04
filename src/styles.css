@@ -350,6 +350,47 @@ h2 {
   font-weight: 800;
 }
 
+.match-legend {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legend-swatch {
+  min-width: 84px;
+  padding: 8px 10px;
+  border: 2px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.legend-swatch[data-match="exact"] {
+  color: var(--match-exact);
+  background: var(--match-exact-bg);
+}
+
+.legend-swatch[data-match="partial"] {
+  color: var(--match-partial);
+  background: var(--match-partial-bg);
+}
+
+.legend-swatch[data-match="miss"] {
+  color: var(--muted);
+  background: var(--match-miss);
+}
+
 .comparison-history {
   margin-top: 12px;
   overflow-x: auto;
@@ -451,6 +492,10 @@ h2 {
   .guess-control,
   .suggestion-option {
     grid-template-columns: 1fr;
+  }
+
+  .match-legend {
+    align-items: flex-start;
   }
 
   .comparison-history {

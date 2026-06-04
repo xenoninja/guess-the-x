@@ -68,6 +68,12 @@ describe("Guess The X app shell", () => {
     expect(html).toContain('role="listbox"');
     expect(html).toContain('data-player-guess-form');
     expect(html).toContain('class="comparison-history"');
+    expect(html).toContain('class="match-legend"');
+    expect(html).toContain("Exact");
+    expect(html).toContain("Partial");
+    expect(html).toContain("Miss");
+    expect(html).not.toContain("Open Clue help");
+    expect(html).not.toContain("data-clue-help-button");
     expect(html).toContain('class="comparison-grid"');
     expect(html).toContain('class="comparison-row"');
     expect(html).toContain('class="guess-row-header">Bukayo Saka</div>');

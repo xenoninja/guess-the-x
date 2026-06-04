@@ -32,9 +32,9 @@
       --match-partial: #B8860B;
       --match-partial-bg: #FFF3CD;
       --match-partial-text: #664D03;
-      --match-wrong: #E5E5E5;
-      --match-wrong-bg: #E5E5E5;
-      --match-wrong-text: #737373;
+      --match-miss: #E5E5E5;
+      --match-miss-bg: #E5E5E5;
+      --match-miss-text: #737373;
 
       --font-display: 'Space Mono', monospace;
       --font-body: 'Inter', system-ui, sans-serif;
@@ -66,9 +66,9 @@
         --match-partial: #E9C46A;
         --match-partial-bg: #78350F;
         --match-partial-text: #FEF3C7;
-        --match-wrong: #333333;
-        --match-wrong-bg: #333333;
-        --match-wrong-text: #888888;
+        --match-miss: #333333;
+        --match-miss-bg: #333333;
+        --match-miss-text: #888888;
       }
     }
 
@@ -455,9 +455,9 @@
       border-color: var(--color-black);
     }
 
-    .grid-cell.cell-wrong {
-      background: var(--match-wrong-bg);
-      color: var(--match-wrong-text);
+    .grid-cell.cell-miss {
+      background: var(--match-miss-bg);
+      color: var(--match-miss-text);
     }
 
     .cell-content {
@@ -550,7 +550,7 @@
 
     .legend-swatch.exact { background: var(--match-exact-bg); }
     .legend-swatch.partial { background: var(--match-partial-bg); }
-    .legend-swatch.wrong { background: var(--match-wrong-bg); }
+    .legend-swatch.miss { background: var(--match-miss-bg); }
 
     /* Feedback */
     .feedback {
@@ -936,7 +936,7 @@
       }
 
       function buildCell(attr, guessedValue, targetValue) {
-        let statusClass = 'cell-wrong';
+        let statusClass = 'cell-miss';
         let displayValue = String(guessedValue);
         let direction = null;
         let ariaLabel = `${attr}: ${guessedValue}`;
@@ -956,7 +956,7 @@
             statusClass = 'cell-exact';
             ariaLabel += ', correct';
           } else {
-            statusClass = 'cell-wrong';
+            statusClass = 'cell-miss';
             ariaLabel += ', incorrect';
           }
         }
