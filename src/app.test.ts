@@ -101,11 +101,75 @@ describe("Guess The X app shell", () => {
         maxAttempts: 6,
         completed: true,
       },
+      resultSummary: {
+        outcome: "won",
+        answerName: "Erling Haaland",
+        answerImageUrl: "https://img.example.test/haaland.png",
+        answerClues: [
+          { label: "Player", value: "Erling Haaland" },
+          { label: "Nation", value: "Norway" },
+          { label: "Position", value: "Attack" },
+          { label: "Puzzle Age", value: "25" },
+          { label: "Height", value: "195 cm" },
+          { label: "Foot", value: "left" },
+          { label: "Club", value: "Manchester City Football Club" },
+        ],
+      },
+      comparisonHistory: [
+        {
+          playerId: 10,
+          playerName: "Erling Haaland",
+          clues: [
+            { label: "Player", value: "Erling Haaland", match: "exact" },
+            { label: "Nation", value: "Norway", match: "exact" },
+            { label: "Position", value: "Attack", match: "exact" },
+            { label: "Puzzle Age", value: "25", match: "exact" },
+            { label: "Height", value: "195 cm", match: "exact" },
+            { label: "Foot", value: "left", match: "exact" },
+            { label: "Club", value: "Manchester City Football Club", match: "exact" },
+          ],
+        },
+      ],
     });
 
     expect(html).toContain("Daily Puzzle locked");
     expect(html).toContain("0 attempts left");
     expect(html).toContain("disabled");
+    expect(html).toContain('class="result-panel"');
+    expect(html).toContain("Solved");
+    expect(html).toContain('src="https://img.example.test/haaland.png"');
+    expect(html).toContain('alt="Erling Haaland portrait"');
+    expect(html).toContain('class="result-answer-row"');
+    expect(html).toContain("Manchester City Football Club");
+    expect(html).not.toContain("Share");
+    expect(html).not.toContain("Play Again");
+    expect(html.indexOf('class="comparison-history"')).toBeLessThan(html.indexOf('class="result-panel"'));
+  });
+
+  it("does not render the hidden answer or portrait before Daily Puzzle completion", () => {
+    const html = renderRoute("/football", {
+      footballState: "ready",
+      footballDataSummary: {
+        guessablePlayerCount: 12899,
+        answerCandidateCount: 732,
+      },
+      dailyPuzzleSummary: {
+        puzzleDate: "2026-06-04",
+        attemptsRemaining: 6,
+        maxAttempts: 6,
+        completed: false,
+      },
+      resultSummary: {
+        outcome: "lost",
+        answerName: "Hidden Answer",
+        answerImageUrl: "https://img.example.test/hidden-answer.png",
+        answerClues: [{ label: "Player", value: "Hidden Answer" }],
+      },
+    });
+
+    expect(html).not.toContain("Hidden Answer");
+    expect(html).not.toContain("https://img.example.test/hidden-answer.png");
+    expect(html).not.toContain('class="result-panel"');
   });
 
   it("accepts the trailing slash football route", () => {

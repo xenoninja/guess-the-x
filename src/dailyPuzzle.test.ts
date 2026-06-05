@@ -5,6 +5,7 @@ import {
   consumeDailyPuzzleResetQuery,
   createDailyPuzzle,
   getUtcPuzzleDate,
+  recordDailyPuzzleGuess,
   savePuzzleProgress,
   selectDailyPuzzleAnswer,
 } from "./dailyPuzzle";
@@ -78,6 +79,40 @@ describe("Daily Puzzle", () => {
     expect(puzzle.progress.outcome).toBe("won");
     expect(puzzle.attemptsRemaining).toBe(4);
     expect(puzzle.completed).toBe(true);
+  });
+
+  it("records a correct accepted guess before marking the Daily Puzzle won", () => {
+    const progress = recordDailyPuzzleGuess({
+      progress: {
+        gameId: "guess-football-player",
+        puzzleDate: "2026-06-04",
+        dataVersion: "football-players-2025-v1",
+        guessedPlayerIds: [100],
+        outcome: null,
+      },
+      guessedPlayerId: 200,
+      answerPlayerId: 200,
+    });
+
+    expect(progress.guessedPlayerIds).toEqual([100, 200]);
+    expect(progress.outcome).toBe("won");
+  });
+
+  it("records a sixth wrong accepted guess before marking the Daily Puzzle lost", () => {
+    const progress = recordDailyPuzzleGuess({
+      progress: {
+        gameId: "guess-football-player",
+        puzzleDate: "2026-06-04",
+        dataVersion: "football-players-2025-v1",
+        guessedPlayerIds: [100, 101, 102, 103, 104],
+        outcome: null,
+      },
+      guessedPlayerId: 105,
+      answerPlayerId: 200,
+    });
+
+    expect(progress.guessedPlayerIds).toEqual([100, 101, 102, 103, 104, 105]);
+    expect(progress.outcome).toBe("lost");
   });
 
   it("ignores saved Puzzle Progress when the data version does not match", () => {

@@ -4,8 +4,13 @@ import "@fontsource/inter/latin-900.css";
 import "@fontsource/space-mono/latin-400.css";
 import "@fontsource/space-mono/latin-700.css";
 import "./styles.css";
-import { renderRoute, routeForPath } from "./app";
-import { consumeDailyPuzzleResetQuery, createDailyPuzzle, savePuzzleProgress } from "./dailyPuzzle";
+import { renderRoute, routeForPath, type DailyPuzzleResultSummary } from "./app";
+import {
+  consumeDailyPuzzleResetQuery,
+  createDailyPuzzle,
+  recordDailyPuzzleGuess,
+  savePuzzleProgress,
+} from "./dailyPuzzle";
 import { createDuckDbFootballDataSource } from "./duckdbFootballDataSource";
 import { compareFootballGuess } from "./footballClues";
 import {
@@ -13,6 +18,8 @@ import {
   FOOTBALL_DATA_VERSION,
   FOOTBALL_GAME_ID,
   loadFootballData,
+  type FootballData,
+  type FootballPlayer,
 } from "./footballData";
 import {
   moveActiveSuggestionIndex,
@@ -65,7 +72,7 @@ async function renderApp(rootElement: HTMLElement): Promise<void> {
 
 function renderReadyFootballGame(
   rootElement: HTMLElement,
-  footballData: Awaited<ReturnType<typeof loadFootballData>>,
+  footballData: FootballData,
   now: Date,
 ): void {
   const dailyPuzzle = createDailyPuzzle({
@@ -85,6 +92,9 @@ function renderReadyFootballGame(
       maxAttempts: dailyPuzzle.maxAttempts,
       completed: dailyPuzzle.completed,
     },
+    resultSummary: dailyPuzzle.completed
+      ? createDailyPuzzleResultSummary(dailyPuzzle.answer, dailyPuzzle.identity.puzzleDate, dailyPuzzle.progress.outcome)
+      : undefined,
     comparisonHistory: dailyPuzzle.progress.guessedPlayerIds
       .map((playerId) => footballData.guessablePlayers.find((player) => player.playerId === playerId))
       .filter((player) => player !== undefined)
@@ -103,13 +113,37 @@ function renderReadyFootballGame(
     guessedPlayerIds: dailyPuzzle.progress.guessedPlayerIds,
     disabled: dailyPuzzle.completed,
     onAcceptedGuess(playerId) {
-      savePuzzleProgress(window.localStorage, {
-        ...dailyPuzzle.progress,
-        guessedPlayerIds: [...dailyPuzzle.progress.guessedPlayerIds, playerId],
-      });
+      savePuzzleProgress(
+        window.localStorage,
+        recordDailyPuzzleGuess({
+          progress: dailyPuzzle.progress,
+          guessedPlayerId: playerId,
+          answerPlayerId: dailyPuzzle.answer.playerId,
+        }),
+      );
       renderReadyFootballGame(rootElement, footballData, now);
     },
   });
+}
+
+function createDailyPuzzleResultSummary(
+  answer: FootballPlayer,
+  puzzleDate: string,
+  outcome: "won" | "lost" | null,
+): DailyPuzzleResultSummary | undefined {
+  if (!outcome) {
+    return undefined;
+  }
+
+  return {
+    outcome,
+    answerName: answer.name,
+    answerImageUrl: answer.imageUrl,
+    answerClues: compareFootballGuess({ guess: answer, answer, puzzleDate }).clues.map((clue) => ({
+      label: clue.label,
+      value: clue.value,
+    })),
+  };
 }
 
 type HydratePlayerGuessComboboxInput = {
