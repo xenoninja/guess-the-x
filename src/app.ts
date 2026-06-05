@@ -10,6 +10,16 @@ export type DailyPuzzleSummary = {
   maxAttempts: number;
   completed: boolean;
 };
+export type ResultAnswerClueSummary = {
+  label: string;
+  value: string;
+};
+export type DailyPuzzleResultSummary = {
+  outcome: "won" | "lost";
+  answerName: string;
+  answerImageUrl: string;
+  answerClues: ResultAnswerClueSummary[];
+};
 export type ClueComparisonSummary = {
   label: string;
   value: string;
@@ -25,6 +35,7 @@ export type RenderRouteOptions = {
   footballState?: FootballShellState;
   footballDataSummary?: FootballDataSummary;
   dailyPuzzleSummary?: DailyPuzzleSummary;
+  resultSummary?: DailyPuzzleResultSummary;
   comparisonHistory?: GuessComparisonSummary[];
 };
 
@@ -64,6 +75,7 @@ export function renderRoute(pathname: string, options: RenderRouteOptions = {}):
       options.footballState ?? "loading",
       options.footballDataSummary,
       options.dailyPuzzleSummary,
+      options.resultSummary,
       options.comparisonHistory ?? [],
     );
   }
@@ -83,6 +95,7 @@ function renderFootballShell(
   state: FootballShellState,
   summary?: FootballDataSummary,
   dailyPuzzleSummary?: DailyPuzzleSummary,
+  resultSummary?: DailyPuzzleResultSummary,
   comparisonHistory: GuessComparisonSummary[] = [],
 ): string {
   return renderPage({
@@ -99,7 +112,7 @@ function renderFootballShell(
             <p>Call your shot. Six tries. The grid exposes the truth.</p>
           </section>
 
-          ${renderFootballState(state, summary, dailyPuzzleSummary, comparisonHistory)}
+          ${renderFootballState(state, summary, dailyPuzzleSummary, resultSummary, comparisonHistory)}
         </main>
       `,
   });
@@ -109,6 +122,7 @@ function renderFootballState(
   state: FootballShellState,
   summary?: FootballDataSummary,
   dailyPuzzleSummary?: DailyPuzzleSummary,
+  resultSummary?: DailyPuzzleResultSummary,
   comparisonHistory: GuessComparisonSummary[] = [],
 ): string {
   if (state === "error") {
@@ -148,6 +162,7 @@ function renderFootballState(
         ${renderMatchLegend()}
         ${renderGuessCombobox(dailyPuzzleSummary)}
         ${renderComparisonHistory(comparisonHistory)}
+        ${dailyPuzzleSummary.completed && resultSummary ? renderResultPanel(resultSummary) : ""}
         ${dailyPuzzleSummary.completed ? '<p class="lock-copy">Daily Puzzle locked</p>' : ""}
         <p>The grid is armed.</p>
       </section>
@@ -160,6 +175,34 @@ function renderFootballState(
       <h2 id="loading-title">Loading player database</h2>
       <p>Preparing Guessable Players and Answer Candidates.</p>
     </section>
+  `;
+}
+
+function renderResultPanel(result: DailyPuzzleResultSummary): string {
+  const title = result.outcome === "won" ? "Solved" : "Answer Revealed";
+
+  return `
+    <section class="result-panel" aria-labelledby="result-title">
+      <div class="result-copy">
+        <p class="state-kicker">${title}</p>
+        <h2 id="result-title">${escapeHtml(result.answerName)}</h2>
+      </div>
+      <img class="result-portrait" src="${escapeHtml(result.answerImageUrl)}" alt="${escapeHtml(
+        result.answerName,
+      )} portrait" />
+      <div class="result-answer-row" aria-label="Answer row">
+        ${result.answerClues.map(renderResultAnswerClue).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderResultAnswerClue(clue: ResultAnswerClueSummary): string {
+  return `
+    <div class="result-answer-clue">
+      <span>${escapeHtml(clue.label)}</span>
+      <strong>${escapeHtml(clue.value)}</strong>
+    </div>
   `;
 }
 

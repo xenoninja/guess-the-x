@@ -101,6 +101,43 @@ export function savePuzzleProgress(progressStore: PuzzleProgressStore, progress:
   progressStore.setItem(puzzleProgressStorageKey(progress), JSON.stringify(progress));
 }
 
+export type RecordDailyPuzzleGuessInput = {
+  progress: PuzzleProgress;
+  guessedPlayerId: number;
+  answerPlayerId: number;
+};
+
+export function recordDailyPuzzleGuess({
+  progress,
+  guessedPlayerId,
+  answerPlayerId,
+}: RecordDailyPuzzleGuessInput): PuzzleProgress {
+  const guessedPlayerIds = [...progress.guessedPlayerIds, guessedPlayerId];
+
+  return {
+    ...progress,
+    guessedPlayerIds,
+    outcome: getUpdatedPuzzleOutcome(progress, guessedPlayerIds, guessedPlayerId, answerPlayerId),
+  };
+}
+
+function getUpdatedPuzzleOutcome(
+  progress: PuzzleProgress,
+  guessedPlayerIds: number[],
+  guessedPlayerId: number,
+  answerPlayerId: number,
+): PuzzleProgressOutcome | null {
+  if (progress.outcome) {
+    return progress.outcome;
+  }
+
+  if (guessedPlayerId === answerPlayerId) {
+    return "won";
+  }
+
+  return guessedPlayerIds.length >= DAILY_PUZZLE_ATTEMPT_LIMIT ? "lost" : null;
+}
+
 export function clearPuzzleProgress(
   progressStore: PuzzleProgressStore,
   identity: Pick<DailyPuzzleIdentity, "gameId" | "puzzleDate">,
