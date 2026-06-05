@@ -1,8 +1,4 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import duckdbWasmEh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
-import duckdbWorkerEh from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-import duckdbWasmMvp from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
-import duckdbWorkerMvp from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
 import type { FootballPlayer, FootballPlayerDataSource } from "./footballData";
 
 const DUCKDB_FOOTBALL_FILE = "football-players-2025-v1.parquet";
@@ -14,7 +10,12 @@ export function createDuckDbFootballDataSource(): FootballPlayerDataSource {
       const connection = await db.connect();
 
       try {
-        await db.registerFileURL(DUCKDB_FOOTBALL_FILE, assetPath, duckdb.DuckDBDataProtocol.HTTP, false);
+        await db.registerFileURL(
+          DUCKDB_FOOTBALL_FILE,
+          resolveDuckDbHttpUrl(assetPath),
+          duckdb.DuckDBDataProtocol.HTTP,
+          false,
+        );
         const table = await connection.query(`
           SELECT
             player_id,
@@ -49,25 +50,27 @@ export function createDuckDbFootballDataSource(): FootballPlayerDataSource {
   };
 }
 
+function resolveDuckDbHttpUrl(assetPath: string): string {
+  return new URL(assetPath, window.location.href).toString();
+}
+
 async function createDuckDb(): Promise<duckdb.AsyncDuckDB> {
-  const bundle = await duckdb.selectBundle({
-    mvp: {
-      mainModule: duckdbWasmMvp,
-      mainWorker: duckdbWorkerMvp,
-    },
-    eh: {
-      mainModule: duckdbWasmEh,
-      mainWorker: duckdbWorkerEh,
-    },
-  });
+  const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
   if (!bundle.mainWorker) {
     throw new Error("DuckDB-Wasm selected bundle is missing a worker URL.");
   }
 
-  const worker = new Worker(bundle.mainWorker);
+  const workerUrl = URL.createObjectURL(
+    new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" }),
+  );
+  const worker = new Worker(workerUrl);
   const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
 
-  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  try {
+    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  } finally {
+    URL.revokeObjectURL(workerUrl);
+  }
 
   return db;
 }
