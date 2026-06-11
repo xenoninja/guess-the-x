@@ -1,4 +1,4 @@
-export const FOOTBALL_DATA_ASSET_PATH = "/data/football-players-2025-v1.jsonl";
+export const FOOTBALL_DATA_ASSET_PATH = "/data/football-players-2025-v1.jsonl?v=text";
 export const FOOTBALL_DATA_VERSION = "football-players-2025-v1";
 export const FOOTBALL_GAME_ID = "guess-football-player";
 export const EXPECTED_FOOTBALL_DATA_SUMMARY = {
