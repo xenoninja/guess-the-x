@@ -11,7 +11,6 @@ import {
   recordDailyPuzzleGuess,
   savePuzzleProgress,
 } from "./dailyPuzzle";
-import { createDuckDbFootballDataSource } from "./duckdbFootballDataSource";
 import { compareFootballGuess } from "./footballClues";
 import {
   EXPECTED_FOOTBALL_DATA_SUMMARY,
@@ -21,6 +20,7 @@ import {
   type FootballData,
   type FootballPlayer,
 } from "./footballData";
+import { createJsonFootballDataSource } from "./jsonFootballDataSource";
 import {
   moveActiveSuggestionIndex,
   searchGuessablePlayers,
@@ -58,7 +58,7 @@ async function renderApp(rootElement: HTMLElement): Promise<void> {
   rootElement.innerHTML = renderRoute(window.location.pathname, { footballState: "loading" });
 
   try {
-    const footballData = await loadFootballData(createDuckDbFootballDataSource(), {
+    const footballData = await loadFootballData(createJsonFootballDataSource(), {
       expectedSummary: EXPECTED_FOOTBALL_DATA_SUMMARY,
     });
     renderReadyFootballGame(rootElement, footballData, now);
