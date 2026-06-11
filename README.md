@@ -2,14 +2,13 @@
 
 Guess The X is a family of daily deduction games where players identify a hidden subject from structured clues. The first game is **Guess The Football Player**, a fully client-side football Daily Puzzle at `/football`.
 
-The app loads a versioned football Parquet data asset in the browser with DuckDB-Wasm, selects a deterministic answer for the UTC Puzzle Date, and stores Puzzle Progress locally. The v1 build is intentionally static: no backend, accounts, analytics, share flow, PWA/offline support, or anti-cheat service.
+The app loads a versioned compact football JSONL data asset in the browser, selects a deterministic answer for the UTC Puzzle Date, and stores Puzzle Progress locally. The v1 build is intentionally static: no backend, accounts, analytics, share flow, PWA/offline support, or anti-cheat service.
 
 ## Tech Stack
 
 - Vite
 - TypeScript
 - Vitest
-- DuckDB-Wasm
 - Cloudflare Pages static hosting
 
 ## Local Development
@@ -81,4 +80,3 @@ npx wrangler pages deploy dist --project-name <cloudflare-pages-project-name>
 ```
 
 Use the Cloudflare dashboard to connect the GitHub repository for automatic production deployments from `master` and preview deployments from pull requests.
-

@@ -10,14 +10,14 @@ Run from the repository root:
 
 ```bash
 ./database/football/prepare/build-football.sh
-./database/football/prepare/export-football-parquet.sh
+./database/football/prepare/export-football-json.sh
 ```
 
 The script reads `database/football/prepare/transfermarkt-datasets.duckdb`,
 builds and validates a temporary database, then replaces
-`database/football/football.duckdb` only
-after validation passes. The export script writes the versioned browser data
-asset to `public/data/football-players-2025-v1.parquet`. The filtering and
+`database/football/football.duckdb` only after validation passes. The export
+script writes the versioned compact browser data asset to
+`public/data/football-players-2025-v1.jsonl`. The filtering and
 transformation logic lives in `database/football/prepare/build-football.sql`.
 
 ## Runtime Table

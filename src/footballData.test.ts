@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { formatDuckDbDate } from "./duckdbFootballDataSource";
 import { EXPECTED_FOOTBALL_DATA_SUMMARY, FOOTBALL_DATA_ASSET_PATH, loadFootballData } from "./footballData";
 
 describe("football data loading", () => {
@@ -36,11 +35,6 @@ describe("football data loading", () => {
         { expectedSummary: EXPECTED_FOOTBALL_DATA_SUMMARY },
       ),
     ).rejects.toThrow("Expected 12,899 Guessable Players and 732 Answer Candidates");
-  });
-
-  it("formats DuckDB Date values from Arrow epoch milliseconds", () => {
-    expect(formatDuckDbDate(Date.UTC(1987, 5, 24))).toBe("1987-06-24");
-    expect(formatDuckDbDate({ valueOf: () => Date.UTC(2001, 8, 5) })).toBe("2001-09-05");
   });
 });
 
